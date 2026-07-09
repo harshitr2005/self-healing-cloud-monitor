@@ -221,7 +221,7 @@ python3 fetch_status.py
 
 ## EC2 Instance
 
-![EC2](screenshots/02-ec2-instance-running.png)
+![EC2](screenshots/01-ec2-instance-running.png)
 
 ---
 
@@ -233,7 +233,7 @@ python3 fetch_status.py
 
 ## SNS Email Alert
 
-![SNS](screenshots/sns-alert.png)
+![SNS](screenshots/sns-topic-confirmed.png)
 
 ---
 
