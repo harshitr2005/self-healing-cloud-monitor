@@ -221,13 +221,13 @@ python3 fetch_status.py
 
 ## EC2 Instance
 
-![EC2](screenshots/ec2-instance.png)
+![EC2](screenshots/02-ec2-instance-running.png)
 
 ---
 
 ## CloudWatch Alarm
 
-![CloudWatch](screenshots/cloudwatch.png)
+![CloudWatch](screenshots/11-cloudwatch-both-alarms.png)
 
 ---
 
@@ -239,7 +239,7 @@ python3 fetch_status.py
 
 ## Amazon S3 Logs
 
-![S3](screenshots/s3-logs.png)
+![S3](screenshots/14-metrics-and-logs.png)
 
 ---
 
