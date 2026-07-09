@@ -11,7 +11,6 @@
 body{background:var(--bg);color:var(--t);font-family:var(--sans);min-height:100vh}
 .scan{position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.03) 2px,rgba(0,0,0,.03) 4px);pointer-events:none}
 
-/* ANIMATIONS */
 @keyframes p{0%,100%{opacity:1}50%{opacity:.4}}
 @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
 @keyframes pillGlow{0%,100%{box-shadow:0 0 0 rgba(99,179,137,0)}50%{box-shadow:0 0 6px rgba(99,179,137,.4)}}
@@ -25,7 +24,6 @@ h1{font-family:var(--mono);font-size:14px;letter-spacing:2px;color:var(--g);text
 .live{font-family:var(--mono);font-size:11px;color:var(--g);border:1px solid var(--g);padding:3px 10px;border-radius:3px;display:flex;align-items:center;gap:6px}
 .ldot{width:6px;height:6px;background:var(--g);border-radius:50%;animation:p 1s infinite}
 
-/* Time display */
 .time-wrap{display:flex;flex-direction:column;align-items:flex-end;gap:2px}
 .clk-ist{font-family:var(--mono);font-size:13px;color:var(--t)}
 .clk-utc{font-family:var(--mono);font-size:10px;color:var(--m)}
@@ -34,7 +32,6 @@ main{padding:2rem;max-width:1200px;margin:0 auto;position:relative;z-index:1}
 .lbl{font-family:var(--mono);font-size:10px;letter-spacing:3px;color:var(--m);text-transform:uppercase;margin-bottom:1rem}
 .grid4{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin-bottom:2rem}
 
-/* Cards with fade-up stagger */
 .card{background:var(--s);border:1px solid var(--b);border-radius:6px;padding:1.25rem;position:relative;overflow:hidden;transition:transform .2s,border-color .3s;animation:fadeUp .5s ease both}
 .card:nth-child(1){animation-delay:.1s}
 .card:nth-child(2){animation-delay:.2s}
@@ -48,7 +45,6 @@ main{padding:2rem;max-width:1200px;margin:0 auto;position:relative;z-index:1}
 .card.g .cv{color:var(--g)}.card.b .cv{color:var(--b2)}.card.a .cv{color:var(--a)}
 .cs{font-size:12px;color:var(--m)}
 
-/* Panels */
 .panel{background:var(--s);border:1px solid var(--b);border-radius:6px;padding:1.25rem;margin-bottom:1rem;animation:fadeUp .5s ease both}
 .panel:nth-child(1){animation-delay:.2s}.panel:nth-child(2){animation-delay:.3s}
 .ph{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;padding-bottom:.75rem;border-bottom:1px solid var(--b)}
@@ -60,7 +56,6 @@ main{padding:2rem;max-width:1200px;margin:0 auto;position:relative;z-index:1}
 .rn{font-family:var(--mono);font-size:12px;color:var(--t)}
 .rd{font-family:var(--mono);font-size:10px;color:var(--m);margin-top:2px}
 
-/* Pills with glow animation */
 .pill{font-family:var(--mono);font-size:10px;padding:2px 8px;border-radius:3px}
 .pill.ok{background:rgba(99,179,137,.15);color:var(--g);border:1px solid rgba(99,179,137,.3);animation:pillGlow 3s infinite}
 .pill.warn{background:rgba(246,166,35,.15);color:var(--a);border:1px solid rgba(246,166,35,.3)}
@@ -180,15 +175,13 @@ footer{background:var(--s);border-top:1px solid var(--b);padding:1rem 2rem;displ
 </footer>
 
 <script>
-// IST = UTC + 5:30
+  
 function updateClock(){
   const now = new Date();
-  // UTC
   const uh = String(now.getUTCHours()).padStart(2,'0');
   const um = String(now.getUTCMinutes()).padStart(2,'0');
   const us = String(now.getUTCSeconds()).padStart(2,'0');
   document.getElementById('clk-utc').textContent = uh+':'+um+':'+us+' UTC';
-  // IST (UTC + 5h 30m)
   const ist = new Date(now.getTime() + (5.5 * 60 * 60 * 1000));
   const ih = String(ist.getUTCHours()).padStart(2,'0');
   const im = String(ist.getUTCMinutes()).padStart(2,'0');
@@ -198,7 +191,6 @@ function updateClock(){
 setInterval(updateClock, 1000);
 updateClock();
 
-// Uptime from launch: May 20 2026 07:26:59 UTC (12:56 IST)
 function updateUptime(){
   const diff = Math.floor((Date.now() - new Date('2026-05-20T07:26:59Z')) / 1000);
   const h = Math.floor(diff/3600), m = Math.floor((diff%3600)/60);
@@ -206,7 +198,6 @@ function updateUptime(){
 }
 updateUptime(); setInterval(updateUptime, 60000);
 
-// Live metrics from metrics.json
 function loadMetrics(){
   fetch('/metrics.json?t='+Date.now())
     .then(r=>r.json())
