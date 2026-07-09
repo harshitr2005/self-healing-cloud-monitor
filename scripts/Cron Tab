@@ -1,0 +1,3 @@
+*/5 * * * * sudo python3 /var/www/html/fetch_status.py
+0 * * * * sudo aws s3 cp /var/log/httpd/access_log s3://cloud-monitor-logs-harshit/logs/access_log --region ap-south-1
+*/5 * * * * sudo bash /var/www/html/fetch_metrics.sh
