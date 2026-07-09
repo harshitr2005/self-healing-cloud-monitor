@@ -1,1 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AWS Cloud Monitor</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0a0e1a;--s:#111827;--s2:#1a2235;--b:rgba(99,179,137,.15);--g:#63b381;--b2:#4fc3f7;--a:#f6a623;--t:#e2e8f0;--m:#718096;--mono:'Space Mono',monospace;--sans:'DM Sans',sans-serif}
+body{background:var(--bg);color:var(--t);font-family:var(--sans);min-height:100vh}
+.scan{position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.03) 2px,rgba(0,0,0,.03) 4px);pointer-events:none}
 
+/* ANIMATIONS */
+@keyframes p{0%,100%{opacity:1}50%{opacity:.4}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pillGlow{0%,100%{box-shadow:0 0 0 rgba(99,179,137,0)}50%{box-shadow:0 0 6px rgba(99,179,137,.4)}}
+@keyframes borderGlow{0%,100%{border-color:rgba(99,179,137,.15)}50%{border-color:rgba(99,179,137,.4)}}
+
+header{background:var(--s);border-bottom:1px solid var(--b);padding:1rem 2rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10;animation:fadeUp .5s ease}
+.hl{display:flex;align-items:center;gap:12px}
+.dot{width:10px;height:10px;background:var(--g);border-radius:50%;box-shadow:0 0 8px var(--g);animation:p 2s infinite}
+h1{font-family:var(--mono);font-size:14px;letter-spacing:2px;color:var(--g);text-transform:uppercase}
+.hr{display:flex;align-items:center;gap:16px}
+.live{font-family:var(--mono);font-size:11px;color:var(--g);border:1px solid var(--g);padding:3px 10px;border-radius:3px;display:flex;align-items:center;gap:6px}
+.ldot{width:6px;height:6px;background:var(--g);border-radius:50%;animation:p 1s infinite}
+
+/* Time display */
+.time-wrap{display:flex;flex-direction:column;align-items:flex-end;gap:2px}
+.clk-ist{font-family:var(--mono);font-size:13px;color:var(--t)}
+.clk-utc{font-family:var(--mono);font-size:10px;color:var(--m)}
+
+main{padding:2rem;max-width:1200px;margin:0 auto;position:relative;z-index:1}
+.lbl{font-family:var(--mono);font-size:10px;letter-spacing:3px;color:var(--m);text-transform:uppercase;margin-bottom:1rem}
+.grid4{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin-bottom:2rem}
+
+/* Cards with fade-up stagger */
+.card{background:var(--s);border:1px solid var(--b);border-radius:6px;padding:1.25rem;position:relative;overflow:hidden;transition:transform .2s,border-color .3s;animation:fadeUp .5s ease both}
+.card:nth-child(1){animation-delay:.1s}
+.card:nth-child(2){animation-delay:.2s}
+.card:nth-child(3){animation-delay:.3s}
+.card:nth-child(4){animation-delay:.4s}
+.card:hover{transform:translateY(-2px);animation:borderGlow 2s infinite}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.card.g::before{background:var(--g)}.card.b::before{background:var(--b2)}.card.a::before{background:var(--a)}
+.cl{font-family:var(--mono);font-size:10px;letter-spacing:2px;color:var(--m);text-transform:uppercase;margin-bottom:.5rem}
+.cv{font-family:var(--mono);font-size:28px;font-weight:700;line-height:1;margin-bottom:.25rem}
+.card.g .cv{color:var(--g)}.card.b .cv{color:var(--b2)}.card.a .cv{color:var(--a)}
+.cs{font-size:12px;color:var(--m)}
+
+/* Panels */
+.panel{background:var(--s);border:1px solid var(--b);border-radius:6px;padding:1.25rem;margin-bottom:1rem;animation:fadeUp .5s ease both}
+.panel:nth-child(1){animation-delay:.2s}.panel:nth-child(2){animation-delay:.3s}
+.ph{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;padding-bottom:.75rem;border-bottom:1px solid var(--b)}
+.pt{font-family:var(--mono);font-size:11px;letter-spacing:2px;color:var(--g);text-transform:uppercase}
+.ptag{font-family:var(--mono);font-size:10px;color:var(--m);background:var(--s2);padding:2px 8px;border-radius:3px}
+.row{display:flex;align-items:center;justify-content:space-between;padding:.65rem 0;border-bottom:1px solid var(--b);transition:background .2s}
+.row:hover{background:rgba(99,179,137,.03)}
+.row:last-child{border-bottom:none}
+.rn{font-family:var(--mono);font-size:12px;color:var(--t)}
+.rd{font-family:var(--mono);font-size:10px;color:var(--m);margin-top:2px}
+
+/* Pills with glow animation */
+.pill{font-family:var(--mono);font-size:10px;padding:2px 8px;border-radius:3px}
+.pill.ok{background:rgba(99,179,137,.15);color:var(--g);border:1px solid rgba(99,179,137,.3);animation:pillGlow 3s infinite}
+.pill.warn{background:rgba(246,166,35,.15);color:var(--a);border:1px solid rgba(246,166,35,.3)}
+
+.two{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem}
+@media(max-width:768px){.two{grid-template-columns:1fr}}
+.igrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1.25rem}
+.il{font-family:var(--mono);font-size:10px;letter-spacing:2px;color:var(--m);text-transform:uppercase;margin-bottom:4px}
+.iv{font-family:var(--mono);font-size:11px;color:var(--b2)}
+.arow{display:flex;gap:10px;padding:.75rem 0;border-bottom:1px solid var(--b)}
+.arow:last-child{border-bottom:none}
+.adot{width:8px;height:8px;border-radius:50%;margin-top:4px;flex-shrink:0}
+.adot.i{background:var(--b2)}.adot.w{background:var(--a);animation:p 2s infinite}
+.am{font-family:var(--mono);font-size:11px;line-height:1.5}
+.at{font-size:10px;color:var(--m);margin-top:2px}
+footer{background:var(--s);border-top:1px solid var(--b);padding:1rem 2rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;margin-top:1rem}
+.ft{font-family:var(--mono);font-size:10px;color:var(--m);letter-spacing:1px}
+.tags{display:flex;gap:8px;flex-wrap:wrap}
+.tag{font-family:var(--mono);font-size:10px;color:var(--b2);background:rgba(79,195,247,.08);border:1px solid rgba(79,195,247,.2);padding:2px 8px;border-radius:3px;transition:background .2s}
+.tag:hover{background:rgba(79,195,247,.15)}
+</style>
+</head>
+<body>
+<div class="scan"></div>
+<header>
+  <div class="hl">
+    <div class="dot"></div>
+    <h1>AWS Cloud Monitor</h1>
+  </div>
+  <div class="hr">
+    <div class="live"><div class="ldot"></div>LIVE</div>
+    <div class="time-wrap">
+      <div class="clk-ist" id="clk-ist">--:--:-- IST</div>
+      <div class="clk-utc" id="clk-utc">--:--:-- UTC</div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="lbl">System Status</div>
+  <div class="grid4">
+    <div class="card g">
+      <div class="cl">EC2 Status</div>
+      <div class="cv">UP</div>
+      <div class="cs">t3.micro · ap-south-1a</div>
+    </div>
+    <div class="card b">
+      <div class="cl">Memory Usage</div>
+      <div class="cv" id="mem-val">--%</div>
+      <div class="cs" id="mem-sub">Fetching from server...</div>
+    </div>
+    <div class="card a">
+      <div class="cl">Disk Usage</div>
+      <div class="cv" id="disk-val">--%</div>
+      <div class="cs" id="disk-sub">Fetching from server...</div>
+    </div>
+    <div class="card g">
+      <div class="cl">Uptime</div>
+      <div class="cv" id="up">--</div>
+      <div class="cs">Since May 20, 2026</div>
+    </div>
+  </div>
+
+  <div class="two">
+    <div class="panel">
+      <div class="ph"><span class="pt">AWS Services</span><span class="ptag">Health</span></div>
+      <div class="row"><div><div class="rn">EC2 Instance</div><div class="rd">cloud-monitor-server · i-08b5a426407f92167</div></div><span class="pill ok">RUNNING</span></div>
+      <div class="row"><div><div class="rn">Apache (httpd)</div><div class="rd">Port 80 · Auto-restart on</div></div><span class="pill ok">ACTIVE</span></div>
+      <div class="row"><div><div class="rn">CloudWatch</div><div class="rd">CPU-High-Alert · EC2-Auto-Recovery</div></div><span class="pill ok">2 ALARMS</span></div>
+      <div class="row"><div><div class="rn">SNS Alerts</div><div class="rd">cloud-monitor-alerts · Gmail</div></div><span class="pill ok">SUBSCRIBED</span></div>
+      <div class="row"><div><div class="rn">EBS Volume</div><div class="rd">8 GB gp3 · Snapshot completed</div></div><span class="pill ok">ATTACHED</span></div>
+      <div class="row"><div><div class="rn">S3 Bucket</div><div class="rd">cloud-monitor-logs-harshit</div></div><span class="pill ok">ACTIVE</span></div>
+      <div class="row"><div><div class="rn">IAM Role</div><div class="rd">cloud-monitor-s3-role · S3FullAccess</div></div><span class="pill ok">ATTACHED</span></div>
+      <div class="row"><div><div class="rn">Cron Jobs</div><div class="rd">S3 logs/hr · Status/5min · Metrics/5min</div></div><span class="pill ok">RUNNING</span></div>
+    </div>
+
+    <div class="panel">
+      <div class="ph"><span class="pt">Recent Alerts</span><span class="ptag">SNS · CloudWatch</span></div>
+      <div class="arow"><div class="adot i"></div><div><div class="am">EC2 instance launched successfully</div><div class="at">May 20, 2026 · 12:56 IST · ap-south-1a</div></div></div>
+      <div class="arow"><div class="adot i"></div><div><div class="am">Apache httpd installed & enabled</div><div class="at">May 20, 2026 · Port 80 active</div></div></div>
+      <div class="arow"><div class="adot i"></div><div><div class="am">EBS snapshot completed</div><div class="at">May 20, 2026 · 14:20 IST · 8 GB</div></div></div>
+      <div class="arow"><div class="adot i"></div><div><div class="am">SNS subscription confirmed</div><div class="at">harshit127r@gmail.com · Active</div></div></div>
+      <div class="arow"><div class="adot w"></div><div><div class="am">CloudWatch alarms configured</div><div class="at">CPU > 80% · EC2 auto-reboot on fail</div></div></div>
+      <div class="arow"><div class="adot i"></div><div><div class="am">S3 log shipping automated</div><div class="at">Cron · Every hour · ap-south-1</div></div></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="ph"><span class="pt">Infrastructure Details</span><span class="ptag">AWS · Mumbai ap-south-1</span></div>
+    <div class="igrid">
+      <div><div class="il">Instance ID</div><div class="iv">i-08b5a426407f92167</div></div>
+      <div><div class="il">Public IPv4</div><div class="iv">13.200.251.196</div></div>
+      <div><div class="il">Region / AZ</div><div class="iv">ap-south-1 · ap-south-1a</div></div>
+      <div><div class="il">Instance Type</div><div class="iv">t3.micro · 2 vCPUs</div></div>
+      <div><div class="il">OS / AMI</div><div class="iv">Amazon Linux 2023</div></div>
+      <div><div class="il">AMI ID</div><div class="iv">ami-09ed39e30153c3bf9</div></div>
+      <div><div class="il">Launch Time</div><div class="iv">May 20, 2026 · 12:56 IST</div></div>
+      <div><div class="il">Key Pair</div><div class="iv">cloud-monitor-key · RSA</div></div>
+      <div><div class="il">Security Group</div><div class="iv">cloud-monitor-sg</div></div>
+      <div><div class="il">SSH Access</div><div class="iv">Port 22 · My IP only</div></div>
+      <div><div class="il">HTTP Access</div><div class="iv">Port 80 · Public (0.0.0.0/0)</div></div>
+      <div><div class="il">EBS Snapshot</div><div class="iv">May 20, 2026 · 14:20 IST</div></div>
+      <div><div class="il">S3 Bucket</div><div class="iv">cloud-monitor-logs-harshit</div></div>
+      <div><div class="il">IAM Role</div><div class="iv">cloud-monitor-s3-role</div></div>
+      <div><div class="il">CPU Alarm</div><div class="iv">CPU-High-Alert · &gt; 80%</div></div>
+      <div><div class="il">Recovery Alarm</div><div class="iv">EC2-Auto-Recovery · Reboot</div></div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="ft">AWS CLOUD INFRASTRUCTURE MONITORING · BCA FINAL YEAR PROJECT · NEW HORIZON COLLEGE</div>
+  <div class="tags">
+    <span class="tag">EC2</span><span class="tag">CloudWatch</span><span class="tag">SNS</span>
+    <span class="tag">EBS</span><span class="tag">S3</span><span class="tag">IAM</span>
+  </div>
+</footer>
+
+<script>
+// IST = UTC + 5:30
+function updateClock(){
+  const now = new Date();
+  // UTC
+  const uh = String(now.getUTCHours()).padStart(2,'0');
+  const um = String(now.getUTCMinutes()).padStart(2,'0');
+  const us = String(now.getUTCSeconds()).padStart(2,'0');
+  document.getElementById('clk-utc').textContent = uh+':'+um+':'+us+' UTC';
+  // IST (UTC + 5h 30m)
+  const ist = new Date(now.getTime() + (5.5 * 60 * 60 * 1000));
+  const ih = String(ist.getUTCHours()).padStart(2,'0');
+  const im = String(ist.getUTCMinutes()).padStart(2,'0');
+  const is = String(ist.getUTCSeconds()).padStart(2,'0');
+  document.getElementById('clk-ist').textContent = ih+':'+im+':'+is+' IST';
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// Uptime from launch: May 20 2026 07:26:59 UTC (12:56 IST)
+function updateUptime(){
+  const diff = Math.floor((Date.now() - new Date('2026-05-20T07:26:59Z')) / 1000);
+  const h = Math.floor(diff/3600), m = Math.floor((diff%3600)/60);
+  document.getElementById('up').textContent = h+'h '+m+'m';
+}
+updateUptime(); setInterval(updateUptime, 60000);
+
+// Live metrics from metrics.json
+function loadMetrics(){
+  fetch('/metrics.json?t='+Date.now())
+    .then(r=>r.json())
+    .then(d=>{
+      document.getElementById('mem-val').textContent = d.memory+'%';
+      document.getElementById('mem-sub').textContent = '~'+Math.round(d.memory*10)+' MB of 1 GB';
+      document.getElementById('disk-val').textContent = d.disk+'%';
+      document.getElementById('disk-sub').textContent = Math.round(d.disk*0.08*10)/10+' GB of 8 GB · EBS gp3';
+    })
+    .catch(()=>{
+      document.getElementById('mem-val').textContent='N/A';
+      document.getElementById('disk-val').textContent='N/A';
+    });
+}
+loadMetrics();
+setInterval(loadMetrics, 300000);
+</script>
+</body>
+</html>
