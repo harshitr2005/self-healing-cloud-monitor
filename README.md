@@ -215,7 +215,7 @@ python3 fetch_status.py
 
 ## Dashboard
 
-![Dashboard](dashboard.png)
+![Dashboard](screenshots/15-dashboard.png)
 
 ---
 
