@@ -233,7 +233,7 @@ python3 fetch_status.py
 
 ## SNS Email Alert
 
-![SNS](screenshots/sns-topic-confirmed.png)
+![SNS](screenshots/09-sns-topic-confirmed.png)
 
 ---
 
